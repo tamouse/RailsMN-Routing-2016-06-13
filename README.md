@@ -1,1 +1,1 @@
-A jekyll-reveal.js presentation starter kit
+A presentation on Rails Routing fundamentals

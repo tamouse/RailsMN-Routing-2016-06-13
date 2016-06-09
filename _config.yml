@@ -1,14 +1,9 @@
-title: My basic reveal presentation setup
-author:
-  name: Tamara Temple
-  email: tamouse@gmail.com
-  href: https://github.com/tamouse
-
+title: Rails Routing
 description: |
 
-  A basic slide presentation set up using jekyll and reveal.js
+  Rails Routing Basics
 
-baseurl: "/jekyll-reveal-presentation-starter-kit"
+baseurl: "/RailsMN-Routing-2016-06-13"
 
 markdown: kramdown
 reveal:

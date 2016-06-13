@@ -7,6 +7,36 @@
     text-transform: initial; 	/* over-ride reveal's uppercase */
 }
 
+.left-align {
+    text-align: left;
+}
+
+.reveal table.small-table {
+    background: #eee;
+    color: #333;
+}
+.reveal table.small-table th,
+.reveal table.small-table tr{
+    font-size: 14pt;
+}
+
+.reveal strong, .reveal b { color: lightblue; }
+
+.reveal .two-column {
+    width: 100%;
+}
+
+.reveal .two-column > .left-side,
+.reveal .two-column > .right-side {
+    vertical-align: top;
+    display: inline-block;
+    width: 40%;
+    padding: 0 10px;
+}
+
+code.highlighter-rouge {
+    color: lightgreen;
+}
 footer.slide-footer {
     position: fixed;
     bottom: 0;

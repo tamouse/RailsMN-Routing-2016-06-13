@@ -48,6 +48,661 @@
 </section>
 
 
+<section class="">
+  <h2 id="links">Links</h2>
+
+<ul>
+  <li><a href="https://tamouse.github.io/RailsMN-Routing-2016-06-13">Slides</a></li>
+  <li><a href="https://github.com/tamouse/RailsMN-Routing-2016-06-13">repo</a></li>
+  <li><a href="http://guides.rubyonrails.org/routing.html">Rails Routing Guide</a></li>
+</ul>
+
+</section>
+
+
+<section class="">
+  <h2 id="what-is-routing">What is routing?</h2>
+
+<p class="fragment">recognizes HTTP request verbs and URLs</p>
+
+<p class="fragment">dispatches requests to the right controller and action</p>
+
+<p class="fragment">provides methods for paths and URLs for the application</p>
+
+</section>
+
+
+<section class="">
+  <h2 id="what-is-an-http-request">What is an HTTP request?</h2>
+
+<p>From the <a href="https://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html">RFC</a>:</p>
+
+<pre><code>Request = Request-Line
+          *(( general-header | request-header | entity-header ) CRLF)
+          CRLF
+          [ message-body ]</code></pre>
+
+<pre class="fragment"><code>Request-Line = Method SP Request-URI SP HTTP-Version CRLF</code></pre>
+
+<pre class="fragment"><code>GET / 1.1</code></pre>
+
+
+</section>
+
+
+<section class="">
+  <h2 id="http-methods">HTTP Methods</h2>
+
+<div class="two-column">
+  <div class="left-side">
+    <p>Rails uses these:</p>
+
+    <ul>
+      <li><strong>GET</strong></li>
+      <li><strong>POST</strong></li>
+      <li><strong>PUT</strong> (aka <strong>PATCH</strong>)</li>
+    </ul>
+  </div>
+
+  <div class="right-side">
+    <p>Others:</p>
+
+    <ul>
+      <li><strong>OPTIONS</strong></li>
+      <li><strong>HEAD</strong></li>
+      <li><strong>TRACE</strong></li>
+      <li><strong>CONNECT</strong></li>
+    </ul>
+
+  </div>
+</div>
+
+</section>
+
+
+<section class="">
+  <h2 id="rails-routing-resources">Rails Routing Resources</h2>
+
+<p>Rails standard routing by default <br />uses the concept of a resource.</p>
+
+<pre><code class="ruby">resources :photos</code></pre>
+
+<div class="fragment">
+
+  <p>Which creates 7 different routes:</p>
+
+  <table class="small-table">
+    <thead>
+      <tr>
+        <th style="text-align: left">Verb + Path</th>
+        <th style="text-align: left">Controller#Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="text-align: left">GET /posts</td>
+        <td style="text-align: left">posts#index</td>
+      </tr>
+      <tr>
+        <td style="text-align: left">GET /posts/new</td>
+        <td style="text-align: left">posts#new</td>
+      </tr>
+      <tr>
+        <td style="text-align: left">POST /posts</td>
+        <td style="text-align: left">posts#create</td>
+      </tr>
+      <tr>
+        <td style="text-align: left">GET /posts/:id</td>
+        <td style="text-align: left">posts#show</td>
+      </tr>
+      <tr>
+        <td style="text-align: left">GET /posts/:id/edit</td>
+        <td style="text-align: left">posts#edit</td>
+      </tr>
+      <tr>
+        <td style="text-align: left">PUT /posts/:id</td>
+        <td style="text-align: left">posts#update</td>
+      </tr>
+      <tr>
+        <td style="text-align: left">DELETE /posts/:id</td>
+        <td style="text-align: left">posts#destroy</td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+</section>
+
+
+<section class="">
+  <h3 id="note">Note:</h3>
+
+<p>Because the router uses the HTTP verb <strong>and</strong> the URL to match the route,
+four URLs can map to seven different actions.</p>
+
+<table class="small-table fragment">
+  <thead>
+    <tr>
+      <th style="text-align: left">URL</th>
+      <th style="text-align: left">Verb</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left">/posts</td>
+      <td style="text-align: left">GET (index), POST (create)</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">/posts/:id</td>
+      <td style="text-align: left">GET (read), PUT (update), DELETE (destroy)</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">/posts/:id/new</td>
+      <td style="text-align: left">GET (new)</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">/posts/:id/edit</td>
+      <td style="text-align: left">GET (edit)</td>
+    </tr>
+  </tbody>
+</table>
+
+</section>
+
+
+<section class="">
+  <h2 id="choosing-the-controller">Choosing the Controller</h2>
+
+<p class="left-align">Rails determines which controller it should map to by the following <strong>convention</strong>: convert the resource symbol to a string, run <a href="http://api.rubyonrails.org/classes/ActiveSupport/Inflector.html#method-i-camelize" title="camelize method ActiveSupport::Inflector">camelize</a> on it, concatenate the string “Controller”, and then <a href="http://api.rubyonrails.org/classes/ActiveSupport/Inflector.html#method-i-constantize" title="constantize method in ActiveSupport::Inflector">constantize</a> that.</p>
+
+<pre><code class="ruby">(resource_symbol.to_s.camelize + "Controller").constantize</code></pre>
+
+<p class="left-align fragment">Thus:</p>
+
+<pre class="fragment"><code class="ruby">resources :posts # =&gt; PostsController</code></pre>
+
+<pre class="fragment"><code class="ruby">"posts#new" # =&gt; PostsController#new</code></pre>
+
+
+</section>
+
+
+<section class="">
+  <h2 id="path-and-url-helpers">Path and URL Helpers</h2>
+
+<p>The third thing that Rails routing does is provide <strong>helper</strong> methods for the paths and URLs associated with a given controller and action.</p>
+
+<p><small><em>assume <code>@post.id == 10</code></em></small></p>
+
+<table class="small-table">
+  <thead>
+    <tr>
+      <th style="text-align: left">Helper Method</th>
+      <th style="text-align: left">Result</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left"><code>posts_path</code></td>
+      <td style="text-align: left"><code>/posts</code></td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><code>posts_url</code></td>
+      <td style="text-align: left"><code>https://example.com/posts</code></td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><code>edit_posts_path(@post)</code></td>
+      <td style="text-align: left"><code>/posts/10/edit</code></td>
+    </tr>
+    <tr>
+      <td style="text-align: left"><code>edit_posts_url(@post)</code></td>
+      <td style="text-align: left"><code>https://example.com/posts/10/edit</code></td>
+    </tr>
+  </tbody>
+</table>
+
+</section>
+
+
+<section class="">
+  <h2 id="nested-resources">Nested Resources</h2>
+
+<div class="left-align">
+
+  <p>Resources are logically nested, with children and parents. In our classic model, Comments and the children of Posts.</p>
+
+  <pre><code class="ruby">class Post &lt; ActiveRecord::Base
+  has_many :comments
+end
+
+class Comment &lt; ActiveRecord::Base
+  belongs_to :post
+end</code></pre>
+
+  <p>Nesting routes captures this relationship:</p>
+
+  <pre><code class="ruby">resources :posts do
+  resources :comments
+end</code></pre>
+
+</div>
+
+</section>
+
+
+<section class="">
+  <h2 id="resulting-nested-routes">Resulting Nested Routes</h2>
+
+<table class="small-table">
+  <thead>
+    <tr>
+      <th style="text-align: left">path</th>
+      <th style="text-align: left">verb</th>
+      <th style="text-align: left">url</th>
+      <th style="text-align: left">action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left">post_comments</td>
+      <td style="text-align: left">GET</td>
+      <td style="text-align: left">/posts/:post_id/comments(.:format)</td>
+      <td style="text-align: left">comments#index</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"> </td>
+      <td style="text-align: left">POST</td>
+      <td style="text-align: left">/posts/:post_id/comments(.:format)</td>
+      <td style="text-align: left">comments#create</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">new_post_comment</td>
+      <td style="text-align: left">GET</td>
+      <td style="text-align: left">/posts/:post_id/comments/new(.:format)</td>
+      <td style="text-align: left">comments#new</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">edit_post_comment</td>
+      <td style="text-align: left">GET</td>
+      <td style="text-align: left">/posts/:post_id/comments/:id/edit(.:format)</td>
+      <td style="text-align: left">comments#edit</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">post_comment</td>
+      <td style="text-align: left">GET</td>
+      <td style="text-align: left">/posts/:post_id/comments/:id(.:format)</td>
+      <td style="text-align: left">comments#show</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"> </td>
+      <td style="text-align: left">PATCH</td>
+      <td style="text-align: left">/posts/:post_id/comments/:id(.:format)</td>
+      <td style="text-align: left">comments#update</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"> </td>
+      <td style="text-align: left">PUT</td>
+      <td style="text-align: left">/posts/:post_id/comments/:id(.:format)</td>
+      <td style="text-align: left">comments#update</td>
+    </tr>
+    <tr>
+      <td style="text-align: left"> </td>
+      <td style="text-align: left">DELETE</td>
+      <td style="text-align: left">/posts/:post_id/comments/:id(.:format)</td>
+      <td style="text-align: left">comments#destroy</td>
+    </tr>
+  </tbody>
+</table>
+
+</section>
+
+
+<section class="">
+  <h2 id="limits-to-nesting">Limits to Nesting</h2>
+
+<p>It might be tempting to nest deeply, but this creates more problems and confusion than it solves.</p>
+
+<p>Keep nesting to 1 level.</p>
+
+</section>
+
+
+<section class="">
+  <h2 id="shallow-nesting">Shallow Nesting</h2>
+
+<div class="left-align">
+
+  <p>A useful way to avoid deep nesting, yet keeping many of the benefits.</p>
+
+  <pre><code class="ruby">resources :posts do
+  resources :comments, only: [:index, :new, :create]
+end
+resources :comments, only: [:show, :edit, :update, :destroy]</code></pre>
+
+  <p>Rails provides a shorthand for the above:</p>
+
+  <pre><code class="ruby">resources :posts do
+  resources :comments, shallow: true
+end</code></pre>
+
+</div>
+
+</section>
+
+
+<section class="">
+  <h2 id="resulting-shallow-routes">Resulting Shallow Routes</h2>
+
+<table class="small-table">
+  <thead>
+    <tr>
+      <th style="text-align: right">Prefix</th>
+      <th style="text-align: left">Verb</th>
+      <th style="text-align: left">URI Pattern</th>
+      <th style="text-align: left">Controller#Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: right">post_comments</td>
+      <td style="text-align: left">GET</td>
+      <td style="text-align: left">/posts/:post_id/comments(.:format)</td>
+      <td style="text-align: left">comments#index</td>
+    </tr>
+    <tr>
+      <td style="text-align: right"> </td>
+      <td style="text-align: left">POST</td>
+      <td style="text-align: left">/posts/:post_id/comments(.:format)</td>
+      <td style="text-align: left">comments#create</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">new_post_comment</td>
+      <td style="text-align: left">GET</td>
+      <td style="text-align: left">/posts/:post_id/comments/new(.:format)</td>
+      <td style="text-align: left">comments#new</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">edit_comment</td>
+      <td style="text-align: left">GET</td>
+      <td style="text-align: left">/comments/:id/edit(.:format)</td>
+      <td style="text-align: left">comments#edit</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">comment</td>
+      <td style="text-align: left">GET</td>
+      <td style="text-align: left">/comments/:id(.:format)</td>
+      <td style="text-align: left">comments#show</td>
+    </tr>
+    <tr>
+      <td style="text-align: right"> </td>
+      <td style="text-align: left">PATCH</td>
+      <td style="text-align: left">/comments/:id(.:format)</td>
+      <td style="text-align: left">comments#update</td>
+    </tr>
+    <tr>
+      <td style="text-align: right"> </td>
+      <td style="text-align: left">PUT</td>
+      <td style="text-align: left">/comments/:id(.:format)</td>
+      <td style="text-align: left">comments#update</td>
+    </tr>
+    <tr>
+      <td style="text-align: right"> </td>
+      <td style="text-align: left">DELETE</td>
+      <td style="text-align: left">/comments/:id(.:format)</td>
+      <td style="text-align: left">comments#destroy</td>
+    </tr>
+  </tbody>
+</table>
+
+</section>
+
+
+<section class="">
+  <h2 id="additional-restful-actions">Additional RESTful Actions</h2>
+
+<p>You can add more actions to a resource by adding routes to the collection or individual members.</p>
+
+<pre><code class="ruby">resources :posts do
+  resources :comments, shallow: true
+  collection do
+    get 'search'
+  end
+  member do
+    get 'review'
+  end
+end</code></pre>
+
+<table class="small-table">
+  <thead>
+    <tr>
+      <th style="text-align: right">Prefix</th>
+      <th style="text-align: left">Verb</th>
+      <th style="text-align: left">URI Pattern</th>
+      <th style="text-align: left">Controller#Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: right">search_posts</td>
+      <td style="text-align: left">GET</td>
+      <td style="text-align: left">/posts/search(.:format)</td>
+      <td style="text-align: left">posts#search</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">review_post</td>
+      <td style="text-align: left">GET</td>
+      <td style="text-align: left">/posts/:id/review(.:format)</td>
+      <td style="text-align: left">posts#review</td>
+    </tr>
+  </tbody>
+</table>
+
+</section>
+
+
+<section class="">
+  <h2 id="namespacing">Namespacing</h2>
+
+<p>The concept of “namespacing” goes across Rails in several ways.
+Namespacing routes will allow you to place a resource under a common path,
+and is often used in conjunction with namespaced controllers.</p>
+
+<div class="fragment">
+
+  <p>In a namespaced controller, you’ll have a parent module and the controller class:</p>
+
+  <pre><code class="ruby">class Admin::UsersController &lt; Admin::BaseController</code></pre>
+
+  <p>In routing, you’d follow suit:</p>
+
+  <pre><code class="ruby">namespace :admin do
+  resources :users
+end</code></pre>
+
+</div>
+
+</section>
+
+
+<section class="">
+  <h3 id="resulting-namespaced-routes">Resulting Namespaced Routes:</h3>
+
+<table class="small-table">
+  <thead>
+    <tr>
+      <th style="text-align: right">Prefix</th>
+      <th style="text-align: left">Verb</th>
+      <th style="text-align: left">URI Pattern</th>
+      <th style="text-align: left">Controller#Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: right">admin_users</td>
+      <td style="text-align: left">GET</td>
+      <td style="text-align: left">/admin/users(.:format)</td>
+      <td style="text-align: left">admin/users#index</td>
+    </tr>
+    <tr>
+      <td style="text-align: right"> </td>
+      <td style="text-align: left">POST</td>
+      <td style="text-align: left">/admin/users(.:format)</td>
+      <td style="text-align: left">admin/users#create</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">new_admin_user</td>
+      <td style="text-align: left">GET</td>
+      <td style="text-align: left">/admin/users/new(.:format)</td>
+      <td style="text-align: left">admin/users#new</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">edit_admin_user</td>
+      <td style="text-align: left">GET</td>
+      <td style="text-align: left">/admin/users/:id/edit(.:format)</td>
+      <td style="text-align: left">admin/users#edit</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">admin_user</td>
+      <td style="text-align: left">GET</td>
+      <td style="text-align: left">/admin/users/:id(.:format)</td>
+      <td style="text-align: left">admin/users#show</td>
+    </tr>
+    <tr>
+      <td style="text-align: right"> </td>
+      <td style="text-align: left">PUT</td>
+      <td style="text-align: left">/admin/users/:id(.:format)</td>
+      <td style="text-align: left">admin/users#update</td>
+    </tr>
+    <tr>
+      <td style="text-align: right"> </td>
+      <td style="text-align: left">DELETE</td>
+      <td style="text-align: left">/admin/users/:id(.:format)</td>
+      <td style="text-align: left">admin/users#destroy</td>
+    </tr>
+  </tbody>
+</table>
+
+</section>
+
+
+<section class="">
+  <h2 id="restricting-the-routes-created">Restricting the Routes Created</h2>
+
+<p>Normally Rails creates the seven routes for the default controller actions
+(<code class="highlighter-rouge">index</code>, <code class="highlighter-rouge">show</code>, <code class="highlighter-rouge">new</code>, <code class="highlighter-rouge">create</code>, <code class="highlighter-rouge">edit</code>, <code class="highlighter-rouge">update</code>, <code class="highlighter-rouge">destroy</code>) when you
+specify a resource.</p>
+
+<div class="fragment">
+  <p>You can restrict the routes by using the <br />keywords <code class="highlighter-rouge">only</code> and <code class="highlighter-rouge">except</code></p>
+
+  <pre><code class="ruby">resources :comments, only: [:index, :show]</code></pre>
+
+  <table class="small-table">
+    <thead>
+      <tr>
+        <th style="text-align: right">Prefix</th>
+        <th style="text-align: left">Verb</th>
+        <th style="text-align: left">URI Pattern</th>
+        <th style="text-align: left">Controller#Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="text-align: right">comments</td>
+        <td style="text-align: left">GET</td>
+        <td style="text-align: left">/comments(.:format)</td>
+        <td style="text-align: left">comments#index</td>
+      </tr>
+      <tr>
+        <td style="text-align: right"> </td>
+        <td style="text-align: left">GET</td>
+        <td style="text-align: left">/comments/:id(.:format)</td>
+        <td style="text-align: left">comments#show</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+</section>
+
+
+<section class="">
+  <h2 id="making-seo-friendly-routes">Making SEO-Friendly Routes</h2>
+
+<p>Sometimes you want to make your routes more SEO-friendly, in that they
+reflect the name of what you’re trying to use.</p>
+
+<p class="fragment">The simplest way doesn’t involve changing your <strong>routes</strong> file, at all.
+Set the <code class="highlighter-rouge">to_param</code> class method in your model, and the path/URL helpers will automatically use it.</p>
+
+<div class="fragment">
+  <pre><code class="ruby">class Post &lt; ActiveRecord::Base
+  to_param :title
+end
+
+post_path(@post) # =&gt; "/posts/2-my-little-chthulu"</code></pre>
+</div>
+
+</section>
+
+
+<section class="">
+  <h2 id="routing-matches">Routing Matches</h2>
+
+<p>If the “/posts/2-my-little-chthulu” URL path is issued with a GET HTTP verb, it would match:</p>
+
+<table class="small-table">
+  <thead>
+    <tr>
+      <th style="text-align: right">Prefix</th>
+      <th style="text-align: left">Verb</th>
+      <th style="text-align: left">URI Pattern</th>
+      <th style="text-align: left">Controller#Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: right">post</td>
+      <td style="text-align: left">GET</td>
+      <td style="text-align: left">/posts/:id(.:format)</td>
+      <td style="text-align: left">posts#show</td>
+    </tr>
+  </tbody>
+</table>
+
+<p class="fragment">The <code class="highlighter-rouge">PostsController#show</code> action would receive the <code class="highlighter-rouge">params[:id]</code> containing “2-my-little-chthulu”.</p>
+
+<p class="fragment">The controller finds the post in the <code class="highlighter-rouge">set_post</code> before action callback and loads the post with <code class="highlighter-rouge">id</code> equal to 2.</p>
+
+</section>
+
+
+<section class="">
+  <h2 id="why-this-works">Why this works</h2>
+
+<p>The reason this works is pretty simple, and a little stupid: When Rails runs the <code class="highlighter-rouge">.find(id)</code> method, it first runs <code class="highlighter-rouge">.to_i</code> on the id. Since the actual id number is the first thing in the parameterized “slug”, it can determine the id:</p>
+
+<pre><code class="ruby">"2-my-little-chthulu".to_i # =&gt; 2</code></pre>
+
+<div class="fragment">
+  <p class="left-align">So:</p>
+
+  <pre><code class="ruby"># .. in PostsController#set_post:
+@post = Post.find(params[:id])
+# =&gt; Post.find("2-my-little-chthulu")
+# =&gt; Post.find(2)</code></pre>
+</div>
+
+</section>
+
+
+<section class="">
+  <h1 id="thanks">Thanks!</h1>
+
+</section>
+
+
 </div><!-- .slides -->
 
       <footer class="slide-footer">
